@@ -1,12 +1,8 @@
 import React from 'react';
-import {Text, View} from 'react-native';
+import AppNavigator from './src/navigation';
 
 function App(): JSX.Element {
-  return (
-    <View>
-      <Text>App</Text>
-    </View>
-  );
+  return <AppNavigator />;
 }
 
 export default App;
