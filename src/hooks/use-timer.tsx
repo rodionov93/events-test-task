@@ -1,44 +1,40 @@
 import {useCallback, useEffect, useState} from 'react';
 import {useFocusEffect} from '@react-navigation/native';
 
-const INTERVAL_TIME = 1000;
+enum TimerState {
+  Running = 'running',
+  Pausing = 'pausing',
+  Refetching = 'refetching',
+}
 
 export default function useTimer(seconds: number, callback: () => void) {
-  const [counter, setCounter] = useState(seconds);
-  const [isPausing, setIsPausing] = useState(false);
-
-  const runCallback = useCallback(() => {
-    setCounter(seconds);
-    callback();
-  }, [seconds, callback]);
+  const [timerState, setTimerState] = useState(TimerState.Running);
 
   useFocusEffect(
     useCallback(() => {
-      setIsPausing(false);
-      runCallback();
+      setTimerState(TimerState.Running);
+      callback();
 
-      return () => setIsPausing(true);
-    }, [runCallback]),
+      return () => setTimerState(TimerState.Pausing);
+    }, [callback]),
   );
 
   useEffect(() => {
-    if (!isPausing) {
-      const interval = setInterval(
-        () => setCounter(value => value - 1),
-        INTERVAL_TIME,
-      );
+    if (timerState === TimerState.Running) {
+      const interval = setInterval(() => callback(), seconds * 1000);
 
-      return () => {
-        clearInterval(interval);
-      };
+      return () => clearInterval(interval);
     }
-  }, [isPausing]);
 
-  useEffect(() => {
-    if (counter <= 0) {
-      runCallback();
+    if (timerState === TimerState.Refetching) {
+      setTimerState(TimerState.Running);
     }
-  }, [counter, runCallback]);
+  }, [seconds, callback, timerState]);
 
-  return {manualRefresh: runCallback};
+  const manualRefresh = () => {
+    setTimerState(TimerState.Refetching);
+    callback();
+  };
+
+  return {manualRefresh};
 }

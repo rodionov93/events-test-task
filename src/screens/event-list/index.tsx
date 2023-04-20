@@ -1,5 +1,5 @@
 import React, {useCallback} from 'react';
-import {View, FlatList} from 'react-native';
+import {View, FlatList, ListRenderItem} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useDispatch, useSelector} from 'react-redux';
@@ -27,8 +27,6 @@ export default function EventListScreen() {
   const refetchEvents = useCallback(() => dispatch(fetchEvents()), [dispatch]);
   const {manualRefresh} = useTimer(REFRESH_SECONDS, refetchEvents);
 
-  const keyExtractor = (event: Event) => event.id;
-
   const navigateToDetails = useCallback(
     (eventId: string) => {
       navigation.navigate(AppRoutes.EventDetails, {
@@ -38,18 +36,24 @@ export default function EventListScreen() {
     [navigation],
   );
 
+  const keyExtractor = useCallback((event: Event) => event.id, []);
+  const renderItem: ListRenderItem<Event> = useCallback(
+    ({item}) => (
+      <EventListItem
+        id={item.id}
+        title={item.type}
+        actorLogin={item.actor.displayLogin}
+        onPress={navigateToDetails}
+      />
+    ),
+    [navigateToDetails],
+  );
+
   return (
     <View style={s.container}>
       <FlatList
         data={eventList}
-        renderItem={({item}) => (
-          <EventListItem
-            id={item.id}
-            title={item.type}
-            actorLogin={item.actor.displayLogin}
-            onPress={navigateToDetails}
-          />
-        )}
+        renderItem={renderItem}
         keyExtractor={keyExtractor}
         refreshing={isLoading}
         onRefresh={manualRefresh}
