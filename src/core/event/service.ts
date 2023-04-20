@@ -13,8 +13,11 @@ export const fetchEvents = async (
   });
 
   if (!response) {
+    logFetching(0);
     return [];
   }
+
+  logFetching(response.length);
 
   return response.map(event => ({
     id: event.id,
@@ -30,4 +33,11 @@ export const fetchEvents = async (
       avatarUrl: event.actor.avatar_url,
     },
   }));
+};
+
+const logFetching = (itemCount: number) => {
+  const time = new Date().toTimeString();
+
+  const output = `[${time}] Fetching ${itemCount} events.`;
+  console.log(output);
 };
