@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android",
+    "build-apk": "cd android/ && ENVFILE=.env && ./gradlew assembleRelease assembleRelease",
     "ios": "react-native run-ios",
     "ios12": "react-native run-ios --simulator='iPhone 12 Pro'",
     "lint": "eslint .",
